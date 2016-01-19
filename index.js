@@ -1,11 +1,24 @@
 var rl, readline = require('readline');
 
+/**
+ * creates and returns standard input/output stream 
+ *
+ * @param stdin standard input stream to read input
+ * @param stdout standard output stream
+ * @return the readline interface use for input/output stream 
+ */
 var get_interface = function(stdin, stdout) {
   if (!rl) rl = readline.createInterface(stdin, stdout);
   else stdin.resume(); // interface exists
   return rl;
 }
 
+/**
+ * confirms if the user gave correct input
+ *
+ * @param message custom message
+ * @param callback the callback function to call after confirming user input
+ */
 var confirm = exports.confirm = function(message, callback) {
 
   var question = {
