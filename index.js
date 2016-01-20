@@ -14,10 +14,10 @@ var get_interface = function(stdin, stdout) {
 }
 
 /**
- * confirms if the user gave correct input
+ * checks if the user has given the input that the user agrees on.
  *
  * @param message what is displayed with requesting user's input
- * @param callback the callback function to call after confirming user input
+ * @param callback the callback function to call after checking user input
  * @export
  */
 var confirm = exports.confirm = function(message, callback) {
@@ -38,7 +38,7 @@ var confirm = exports.confirm = function(message, callback) {
 };
 
 /**
- * 
+ * asks questions to the user from the list of questions passed in
  *
  * @param options array of elements from which the user is expected to give a valid answer from
  * @param callback callback function that is called after 
@@ -51,6 +51,7 @@ var get = exports.get = function(options, callback) {
   if (typeof options != 'object')
     return callback(new Error("Please pass a valid options object."))
 
+  // object that holds I/O stream for the user answer
   var answers = {},
       stdin = process.stdin,
       stdout = process.stdout,
@@ -121,13 +122,13 @@ var get = exports.get = function(options, callback) {
 
     if (typeof answer == 'undefined')
       return options[key].allow_empty || typeof get_default(key) != 'undefined';
-    else if(regex = options[key].regex)
+    else if(regex = options[key].regex) // validate using regex
       return regex.test(answer);
     else if(options[key].options)
       return options[key].options.indexOf(answer) != -1;
     else if(options[key].type == 'confirm')
       return typeof(answer) == 'boolean'; // answer was given so it should be
-    else if(options[key].type && options[key].type != 'password')
+    else if(options[key].type && options[key].type != 'password') // checks if the answer is type of password
       return typeof(answer) == options[key].type;
 
     return true;
@@ -202,7 +203,7 @@ var get = exports.get = function(options, callback) {
     var answer = guess_type(reply);
     var return_answer = (typeof answer != 'undefined') ? answer : fallback;
 
-    if (validate(curr_key, answer))
+    if (validate(curr_key, answer)) /// checks if the answer satisfies the requirement for current question
       next_question(++index, curr_key, return_answer);
     else
       show_error(curr_key) || next_question(index); // repeats current
@@ -246,13 +247,13 @@ var get = exports.get = function(options, callback) {
     var curr_key = fields[index];
     if (!curr_key) return done();
 
-    if (options[curr_key].depends_on) {
+    if (options[curr_key].depends_on) { // checks if the question has any depencies
       if (!dependencies_met(options[curr_key].depends_on))
         return next_question(++index, curr_key, undefined);
     }
 
-    var prompt = (options[curr_key].type == 'confirm') ?
-      ' - yes/no: ' : " - " + curr_key + ": ";
+    var prompt = (options[curr_key].type == 'confirm') ? //  confirms if the user gave answer that user wanted
+      ' - yes/no: ' : " - " + curr_key + ": "; 
 
     var fallback = get_default(curr_key, answers);
     if (typeof(fallback) != 'undefined' && fallback !== '')
@@ -292,7 +293,7 @@ var get = exports.get = function(options, callback) {
     var given_answers = Object.keys(answers).length;
     if (fields.length == given_answers) return;
 
-    var err = new Error("Cancelled after giving " + given_answers + " answers.");
+    var err = new Error("Cancelled after giving " + given_answers + " answers."); // when user cancelled the program while giving answer
     callback(err, answers);
   });
 
