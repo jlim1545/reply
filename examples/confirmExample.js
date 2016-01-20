@@ -1,6 +1,6 @@
-var reply = require('./../');
+var replyConfirm = require('./../');
 
-reply.confirm('Are you 18 and older?', function(err, yes){
+replyConfirm.confirm('Are you 18 and older?', function(err, yes){
   var answer = "";
   if (!err && yes)
     answer = "You are ready to enter the world of adult!"
