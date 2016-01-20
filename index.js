@@ -1,10 +1,10 @@
-var rl, readline = require('readline');
+var rl, readline = require('readline'); // module used to get input and put output from/to terminal
 
 /**
- * creates and returns standard input/output stream 
+ * creates and returns standard input/output stream to interact with the user
  *
- * @param stdin standard input stream to read input
- * @param stdout standard output stream
+ * @param stdin standard input stream that comes from the terminal
+ * @param stdout standard output stream goes to the terminal
  * @return the readline interface use for input/output stream 
  */
 var get_interface = function(stdin, stdout) {
@@ -16,8 +16,9 @@ var get_interface = function(stdin, stdout) {
 /**
  * confirms if the user gave correct input
  *
- * @param message custom message
+ * @param message what is displayed with requesting user's input
  * @param callback the callback function to call after confirming user input
+ * @export
  */
 var confirm = exports.confirm = function(message, callback) {
 
@@ -36,6 +37,13 @@ var confirm = exports.confirm = function(message, callback) {
 
 };
 
+/**
+ * 
+ *
+ * @param options array of elements from which the user is expected to give a valid answer from
+ * @param callback callback function that is called after 
+ * @export
+ */
 var get = exports.get = function(options, callback) {
 
   if (!callback) return; // no point in continuing
@@ -48,18 +56,32 @@ var get = exports.get = function(options, callback) {
       stdout = process.stdout,
       fields = Object.keys(options);
 
+  /**
+ * closes the input stream
+ * @callback
+ */
   var done = function() {
     close_prompt();
     callback(null, answers);
   }
 
+  /**
+ * stops the current prompt asked to user and close the input output stream
+ */
   var close_prompt = function() {
     stdin.pause();
     if (!rl) return;
     rl.close();
     rl = null;
   }
-
+ 
+  /**
+ * returns the default answer to the question if there exists
+ *
+ * @param key the index for the options array
+ * @param partial_answers input from the user
+ * @return 
+ */
   var get_default = function(key, partial_answers) {
     if (typeof options[key] == 'object')
       return typeof options[key].default == 'function' ? options[key].default(partial_answers) : options[key].default;
@@ -67,6 +89,12 @@ var get = exports.get = function(options, callback) {
       return options[key];
   }
 
+  /**
+ * compares the user reponse using regex.
+ *
+ * @param reply input from the use
+ * @return true if the user reply matches the expectation, false otherwise
+ */
   var guess_type = function(reply) {
 
     if (reply.trim() == '')
@@ -81,6 +109,14 @@ var get = exports.get = function(options, callback) {
     return reply;
   }
 
+  /**
+ * validates if the answer input by the user is valid input wanted 
+ * based on the input options that user has
+ *
+ * @param key the index for the options array
+ * @param answer input from the user
+ * @return true if user input is valid, false otherwise
+ */
   var validate = function(key, answer) {
 
     if (typeof answer == 'undefined')
@@ -98,6 +134,11 @@ var get = exports.get = function(options, callback) {
 
   }
 
+  /**
+ * prints error message that user asnwer is not part of the options that user is expected to give a valid answer from
+ * prints out the valid lists of answer types that user has
+ * @param key the index for the options array
+ */
   var show_error = function(key) {
     var str = options[key].error ? options[key].error : 'Invalid value.';
 
@@ -107,6 +148,11 @@ var get = exports.get = function(options, callback) {
     stdout.write("\033[31m" + str + "\033[0m" + "\n");
   }
 
+  /**
+ * prints the available options that user is expected to give a valid answer from
+ *
+ * @param key the index for the options array
+ */
   var show_message = function(key) {
     var msg = '';
 
@@ -162,6 +208,12 @@ var get = exports.get = function(options, callback) {
       show_error(curr_key) || next_question(index); // repeats current
   }
 
+  /**
+ * checks if the user reponse has met the condition that it must satisfy to be considered as valid
+ *
+ * @param conds the condintion which the user answer must satisfy
+ * @return true if the user response met the given condition, false otherwise
+ */
   var dependencies_met = function(conds) {
     for (var key in conds) {
       var cond = conds[key];
@@ -179,7 +231,15 @@ var get = exports.get = function(options, callback) {
 
     return true;
   }
-
+  
+  /**
+ * move on the next question if the user gave valid answer for the question asked
+ *
+ * @param index index for the array that contains list of questions
+ * @param prev_key
+ * @param answer input from the user
+ * @return the next question to be asked to the user
+ */
   var next_question = function(index, prev_key, answer) {
     if (prev_key) answers[prev_key] = answer;
 
